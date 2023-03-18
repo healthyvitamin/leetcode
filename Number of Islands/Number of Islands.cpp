@@ -1,20 +1,69 @@
-﻿// Number of Islands.cpp : 此檔案包含 'main' 函式。程式會於該處開始執行及結束執行。
-//
+﻿/*
+給一個二維陣列，1代表土地、0代表水，島會被水包圍，可以假設邊緣都是水，輸出島的個數
+gridColSize 代表有幾行，gridSize代表有幾列
 
-#include <iostream>
+直覺:怎麼找島嶼? 一次找一座 找完將他們刪除變回0
+可以用兩層for迴圈，每當碰到一個1，那麼就用X取代他，接著再進入一個兩層迴圈
+開始掃描屬於這個1的島嶼，從他開始掃描上下左右，如果也是1那麼一樣將他們用X取代
+從左上掃描到右下即可，
+最後清除可用別的符號或是0都可以
 
-int main()
-{
-    std::cout << "Hello World!\n";
+
+問題: 怎麼偵測第二座島? 第二座島明顯不能在屬於第一座島魚的迴圈中做處理
+解:觀察可知，不需特別做處理，因為我們是從一個x展開的，只有當一個值是1，然後他上下左右有X時才會也變成X
+而第二、三座島的周圍都被0包圍了 故不會有X存在，即便掃描到1也不會變成X
+
+
+
+
+
+*/
+
+char NEW = 'X';
+char WATER = '0';
+char LAND = '1';
+char USED = 'O';
+
+void floodFill(char** grid, int number_of_rows, int number_of_cols, int i, int j) {
+    //只要超出邊界，以及偵測到水便結束遞迴
+    if (i < 0 || j < 0 || i >= number_of_rows || j >= number_of_cols || grid[i][j] != LAND)
+    {
+        return;
+    }
+    grid[i][j] = NEW;
+    floodFill(grid, number_of_rows, number_of_cols, i + 1, j);
+    floodFill(grid, number_of_rows, number_of_cols, i - 1, j);
+    floodFill(grid, number_of_rows, number_of_cols, i, j + 1);
+    floodFill(grid, number_of_rows, number_of_cols, i, j - 1);
 }
+int numIslands(char** grid, int gridSize, int* gridColSize) {
 
-// 執行程式: Ctrl + F5 或 [偵錯] > [啟動但不偵錯] 功能表
-// 偵錯程式: F5 或 [偵錯] > [啟動偵錯] 功能表
+    if (gridSize == 0) return 0;
 
-// 開始使用的提示: 
-//   1. 使用 [方案總管] 視窗，新增/管理檔案
-//   2. 使用 [Team Explorer] 視窗，連線到原始檔控制
-//   3. 使用 [輸出] 視窗，參閱組建輸出與其他訊息
-//   4. 使用 [錯誤清單] 視窗，檢視錯誤
-//   5. 前往 [專案] > [新增項目]，建立新的程式碼檔案，或是前往 [專案] > [新增現有項目]，將現有程式碼檔案新增至專案
-//   6. 之後要再次開啟此專案時，請前往 [檔案] > [開啟] > [專案]，然後選取 .sln 檔案
+    int number_of_rows = gridSize;
+    int number_of_cols = gridColSize[0];
+
+    int numberOfIslands = 0;
+    for (int i = 0; i < number_of_rows; i++)
+    {
+        for (int j = 0; j < number_of_cols; j++)
+        {
+            if (grid[i][j] == LAND)
+            {
+                floodFill(grid, number_of_rows, number_of_cols, i, j);
+                for (int y = 0; y < number_of_rows; y++)
+                {
+                    for (int x = 0; x < number_of_cols; x++)
+                    {
+                        if (grid[y][x] == NEW)
+                        {
+                            grid[y][x] = USED;
+                        }
+                    }
+                }
+                numberOfIslands++;
+            }
+        }
+    }
+    return numberOfIslands;
+}
